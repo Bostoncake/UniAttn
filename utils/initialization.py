@@ -232,7 +232,7 @@ def train():
         if training_args.use_layer_idx > 0:
             init_weight_list = []
             for i in range(1, training_args.use_layer_idx+1):
-                init_weight_list.append(np.load(f"{training_args.save_dir}/init_weights_sequantial_index_{i}.npy"))
+                init_weight_list.append(np.load(f"{training_args.save_dir}/init_weights_sequential_index_{i}.npy"))
             init_weight_list = np.array(init_weight_list)
             model.init_layer_by_idx(training_args.use_layer_idx)
             model.init_v2_proj_by_index(init_weight_list, training_args.use_layer_idx)
