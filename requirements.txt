@@ -1,0 +1,6 @@
+numpy
+transformers==4.46.0
+torch
+tokenizers==0.20.1
+wandb
+deepspeed
