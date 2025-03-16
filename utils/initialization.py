@@ -25,6 +25,8 @@ from transformers import Trainer,LlamaForCausalLM,AutoTokenizer
 import utils
 import numpy as np
 from transformers import AutoModelForCausalLM, LlamaConfig
+from transformers import Trainer,AutoModelForCausalLM,LlamaConfig,MistralConfig,Gemma2Config
+
 import os
 IGNORE_INDEX = -100
 DEFAULT_PAD_TOKEN = "[PAD]"
@@ -208,36 +210,100 @@ def train():
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
     
 
-    if model_args.mode == "base":
-        config = LlamaConfig.from_pretrained(model_args.model_name_or_path)
-        from model_file.modeling_llama_weight import LlamaForCausalLM
-        model = LlamaForCausalLM.from_pretrained(
-            model_args.model_name_or_path,
-            device_map='auto',
-            config=config,
-        )
-        print("load modeling_llama_weight LlamaForCausalLM")
-    elif model_args.mode == "softmax_init_sequential":
-        config = LlamaConfig.from_pretrained(model_args.model_name_or_path)
-        config.grouping_idx = model_args.grouping_idx
-        config.grouping_begin_idx = model_args.grouping_begin_idx
-        config.grouping_end_idx = model_args.grouping_end_idx
-        from model_file.modeling_llama_softmax_layer_init_weight_by_index import LlamaForCausalLM
-        model = LlamaForCausalLM.from_pretrained(
-            model_args.model_name_or_path,
-            device_map='auto',
-            config=config,
-        )
-        print("load modeling_llama_softmax_layer_init_weight_by_index LlamaForCausalLM")
-        if training_args.use_layer_idx > 0:
-            init_weight_list = []
-            for i in range(1, training_args.use_layer_idx+1):
-                init_weight_list.append(np.load(f"{training_args.save_dir}/init_weights_sequential_index_{i}.npy"))
-            init_weight_list = np.array(init_weight_list)
-            model.init_layer_by_idx(training_args.use_layer_idx)
-            model.init_v2_proj_by_index(init_weight_list, training_args.use_layer_idx)
-        else:
-            pass
+    if "Llama" in model_args.model_name_or_path:
+        if model_args.mode == "base":
+            config = LlamaConfig.from_pretrained(model_args.model_name_or_path)
+            from model_file.modeling_llama_weight import LlamaForCausalLM
+            model = LlamaForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                device_map='auto',
+                config=config,
+            )
+            print("load modeling_llama_weight LlamaForCausalLM")
+        elif model_args.mode == "softmax_init_sequential":
+            config = LlamaConfig.from_pretrained(model_args.model_name_or_path)
+            config.grouping_idx = model_args.grouping_idx
+            config.grouping_begin_idx = model_args.grouping_begin_idx
+            config.grouping_end_idx = model_args.grouping_end_idx
+            from model_file.modeling_llama_softmax_layer_init_weight_by_index import LlamaForCausalLM
+            model = LlamaForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                device_map='auto',
+                config=config,
+            )
+            print("load modeling_llama_softmax_layer_init_weight_by_index LlamaForCausalLM")
+            if training_args.use_layer_idx > 0:
+                init_weight_list = []
+                for i in range(1, training_args.use_layer_idx+1):
+                    init_weight_list.append(np.load(f"{training_args.save_dir}/init_weights_sequential_index_{i}.npy"))
+                init_weight_list = np.array(init_weight_list)
+                model.init_layer_by_idx(training_args.use_layer_idx)
+                model.init_v2_proj_by_index(init_weight_list, training_args.use_layer_idx)
+            else:
+                pass
+    elif "Mistral" in model_args.model_name_or_path:
+        if model_args.mode == "base":
+            config = MistralConfig.from_pretrained(model_args.model_name_or_path)
+            from model_file.modeling_mistral_weight import MistralForCausalLM
+            model = MistralForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                device_map='auto',
+                config=config,
+            )
+            print("load modeling_mistral_weight MistralForCausalLM")
+        elif model_args.mode == "softmax_init_sequential":
+            config = MistralConfig.from_pretrained(model_args.model_name_or_path)
+            config.grouping_idx = model_args.grouping_idx
+            config.grouping_begin_idx = model_args.grouping_begin_idx
+            config.grouping_end_idx = model_args.grouping_end_idx
+            from model_file.modeling_mistral_softmax_layer_init_weight_by_index import MistralForCausalLM
+            model = MistralForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                device_map='auto',
+                config=config,
+            )
+            print("load modeling_mistral_softmax_layer_init_weight_by_index MistralForCausalLM")
+            if training_args.use_layer_idx > 0:
+                init_weight_list = []
+                for i in range(1, training_args.use_layer_idx+1):
+                    init_weight_list.append(np.load(f"{training_args.save_dir}/init_weights_sequential_index_{i}.npy"))
+                init_weight_list = np.array(init_weight_list)
+                model.init_layer_by_idx(training_args.use_layer_idx)
+                model.init_v2_proj_by_index(init_weight_list, training_args.use_layer_idx)
+            else:
+                pass
+    elif "gemma" in model_args.model_name_or_path or "Gemma" in model_args.model_name_or_path:
+        if model_args.mode == "base":
+            config = Gemma2Config.from_pretrained(model_args.model_name_or_path)
+            from model_file.modeling_gemma2_weight import Gemma2ForCausalLM
+            model = Gemma2ForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                device_map='auto',
+                config=config,
+            )
+            print("load modeling_gemma2_weight Gemma2ForCausalLM")
+        elif model_args.mode == "softmax_init_sequential":
+            config = Gemma2Config.from_pretrained(model_args.model_name_or_path)
+            config.grouping_idx = model_args.grouping_idx
+            config.grouping_begin_idx = model_args.grouping_begin_idx
+            config.grouping_end_idx = model_args.grouping_end_idx
+            from model_file.modeling_gemma2_softmax_layer_init_weight_by_index import Gemma2ForCausalLM
+            model = Gemma2ForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                device_map='auto',
+                config=config,
+            )
+            print("load modeling_gemma2_softmax_layer_init_weight_by_index Gemma2ForCausalLM")
+            if training_args.use_layer_idx > 0:
+                init_weight_list = []
+                for i in range(1, training_args.use_layer_idx+1):
+                    init_weight_list.append(np.load(f"{training_args.save_dir}/init_weights_sequential_index_{i}.npy"))
+                init_weight_list = np.array(init_weight_list)
+                model.init_layer_by_idx(training_args.use_layer_idx)
+                model.init_v2_proj_by_index(init_weight_list, training_args.use_layer_idx)
+            else:
+                pass
+
 
     tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path,)
     special_tokens_dict = dict()
@@ -255,10 +321,14 @@ def train():
         tokenizer=tokenizer,
         model=model,
     )
-
-    result_o1 = torch.zeros(32, 1024, 4096).to(model.device)
-    all_hidden_states_v2 = torch.zeros(32, 1024, 4096).to(model.device)
-    result_o2 = torch.zeros(32, 1024, 4096).to(model.device)
+    if "gemma" in model_args.model_name_or_path or "Gemma" in model_args.model_name_or_path:
+        result_o1 = torch.zeros(42, 1024, 3584).to(model.device)
+        all_hidden_states_v2 = torch.zeros(42, 1024, 3584).to(model.device)
+        result_o2 = torch.zeros(42, 1024, 3584).to(model.device)
+    else:
+        result_o1 = torch.zeros(32, 1024, 4096).to(model.device)
+        all_hidden_states_v2 = torch.zeros(32, 1024, 4096).to(model.device)
+        result_o2 = torch.zeros(32, 1024, 4096).to(model.device)
 
     data_module = make_supervised_data_module(tokenizer=tokenizer, data_args=data_args)
     for i in range(len(data_module["train_dataset"].input_ids)):

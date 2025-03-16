@@ -206,44 +206,125 @@ def make_supervised_data_module(tokenizer: transformers.PreTrainedTokenizer, dat
 def train():
     parser = transformers.HfArgumentParser((ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
-    if model_args.model_mode=="plain":
-        from model_file.modeling_llama import LlamaForCausalLM
-        print("load from model_file.modeling_llama import LlamaForCausalLM")
+    if "Llama" in model_args.model_name_or_path:
+        if model_args.model_mode=="plain":
+            from model_file.modeling_llama import LlamaForCausalLM
+            print("load from model_file.modeling_llama import LlamaForCausalLM")
 
-        config = LlamaConfig.from_pretrained(model_args.model_name_or_path)
-        model = LlamaForCausalLM.from_pretrained(
-            model_args.model_name_or_path,
-            cache_dir=training_args.cache_dir,
-            config=config,
-        )
-    elif model_args.model_mode=="softmax":
-        from model_file.modeling_llama_softmax import LlamaForCausalLM
-        print("load from model_file.modeling_llama_softmax import LlamaForCausalLM")
-        config = LlamaConfig.from_pretrained(model_args.model_name_or_path)
-        config.grouping_idx = model_args.grouping_idx
-        config.grouping_begin_idx = model_args.grouping_begin_idx
-        config.grouping_end_idx = model_args.grouping_end_idx
-        print(config)
-        model = LlamaForCausalLM.from_pretrained(
-            model_args.model_name_or_path,
-            cache_dir=training_args.cache_dir,
-            config=config,
-        )
-    elif model_args.model_mode=="UniAttn":
-        from model_file.modeling_llama_softmax_layer_init import LlamaForCausalLM
-        print("load from model_file.modeling_llama_softmax_layer_init import LlamaForCausalLM")
-        config = LlamaConfig.from_pretrained(model_args.model_name_or_path)
-        config.grouping_idx = model_args.grouping_idx
-        config.grouping_begin_idx = model_args.grouping_begin_idx
-        config.grouping_end_idx = model_args.grouping_end_idx
-        model = LlamaForCausalLM.from_pretrained(
+            config = LlamaConfig.from_pretrained(model_args.model_name_or_path)
+            model = LlamaForCausalLM.from_pretrained(
                 model_args.model_name_or_path,
                 cache_dir=training_args.cache_dir,
                 config=config,
             )
-        print("init weight")
-        init_weight_list = np.load(model_args.proj_init_weight_path)
-        model.init_v2_proj(init_weight_list)
+        elif model_args.model_mode=="softmax":
+            from model_file.modeling_llama_softmax import LlamaForCausalLM
+            print("load from model_file.modeling_llama_softmax import LlamaForCausalLM")
+            config = LlamaConfig.from_pretrained(model_args.model_name_or_path)
+            config.grouping_idx = model_args.grouping_idx
+            config.grouping_begin_idx = model_args.grouping_begin_idx
+            config.grouping_end_idx = model_args.grouping_end_idx
+            print(config)
+            model = LlamaForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                cache_dir=training_args.cache_dir,
+                config=config,
+            )
+        elif model_args.model_mode=="UniAttn":
+            from model_file.modeling_llama_softmax_layer_init import LlamaForCausalLM
+            print("load from model_file.modeling_llama_softmax_layer_init import LlamaForCausalLM")
+            config = LlamaConfig.from_pretrained(model_args.model_name_or_path)
+            config.grouping_idx = model_args.grouping_idx
+            config.grouping_begin_idx = model_args.grouping_begin_idx
+            config.grouping_end_idx = model_args.grouping_end_idx
+            model = LlamaForCausalLM.from_pretrained(
+                    model_args.model_name_or_path,
+                    cache_dir=training_args.cache_dir,
+                    config=config,
+                )
+            print("init weight")
+            init_weight_list = np.load(model_args.proj_init_weight_path)
+            model.init_v2_proj(init_weight_list)
+
+    elif "Mistral" in model_args.model_name_or_path:
+        if model_args.model_mode=="plain":
+            from model_file.modeling_mistral import MistralForCausalLM
+            print("load from model_file.modeling_mistral import MistralForCausalLM")
+
+            config = MistralConfig.from_pretrained(model_args.model_name_or_path)
+            model = MistralForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                cache_dir=training_args.cache_dir,
+                config=config,
+            )
+        elif model_args.model_mode=="softmax":
+            from model_file.modeling_mistral_softmax import MistralForCausalLM
+            print("load from model_file.modeling_llama_softmax import MistralForCausalLM")
+            config = MistralConfig.from_pretrained(model_args.model_name_or_path)
+            config.grouping_idx = model_args.grouping_idx
+            config.grouping_begin_idx = model_args.grouping_begin_idx
+            config.grouping_end_idx = model_args.grouping_end_idx
+            print(config)
+            model = MistralForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                cache_dir=training_args.cache_dir,
+                config=config,
+            )
+        elif model_args.model_mode=="UniAttn":
+            from model_file.modeling_llama_softmax_layer_init import MistralForCausalLM
+            print("load from model_file.modeling_llama_softmax_layer_init import MistralForCausalLM")
+            config = MistralConfig.from_pretrained(model_args.model_name_or_path)
+            config.grouping_idx = model_args.grouping_idx
+            config.grouping_begin_idx = model_args.grouping_begin_idx
+            config.grouping_end_idx = model_args.grouping_end_idx
+            model = MistralForCausalLM.from_pretrained(
+                    model_args.model_name_or_path,
+                    cache_dir=training_args.cache_dir,
+                    config=config,
+                )
+            print("init weight")
+            init_weight_list = np.load(model_args.proj_init_weight_path)
+            model.init_v2_proj(init_weight_list)
+
+    elif "gemma" in model_args.model_name_or_path or "Gemma" in model_args.model_name_or_path:
+        if model_args.model_mode=="plain":
+            from model_file.modeling_gemma2 import Gemma2ForCausalLM
+            print("load from model_file.modeling_gemma2 import Gemma2ForCausalLM")
+            config = Gemma2Config.from_pretrained(model_args.model_name_or_path)
+            model = Gemma2ForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                cache_dir=training_args.cache_dir,
+                config=config,
+            )
+        elif model_args.model_mode=="softmax":
+            from model_file.modeling_gemma2_softmax import Gemma2ForCausalLM
+            print("load from model_file.modeling_gemma2_softmax import Gemma2ForCausalLM")
+            config = Gemma2Config.from_pretrained(model_args.model_name_or_path)
+            config.grouping_idx = model_args.grouping_idx
+            config.grouping_begin_idx = model_args.grouping_begin_idx
+            config.grouping_end_idx = model_args.grouping_end_idx
+            print(config)
+            model = Gemma2ForCausalLM.from_pretrained(
+                model_args.model_name_or_path,
+                cache_dir=training_args.cache_dir,
+                config=config,
+            )
+        elif model_args.model_mode=="UniAttn":
+            from model_file.modeling_gemma2_softmax_layer_init import Gemma2ForCausalLM
+            print("load from model_file.modeling_gemma2_softmax_layer_init import Gemma2ForCausalLM")
+            config = Gemma2Config.from_pretrained(model_args.model_name_or_path)
+            config.grouping_idx = model_args.grouping_idx
+            config.grouping_begin_idx = model_args.grouping_begin_idx
+            config.grouping_end_idx = model_args.grouping_end_idx
+            model = Gemma2ForCausalLM.from_pretrained(
+                    model_args.model_name_or_path,
+                    cache_dir=training_args.cache_dir,
+                    config=config,
+                )
+            print("init weight")
+            init_weight_list = np.load(model_args.proj_init_weight_path)
+            model.init_v2_proj(init_weight_list)
+
 
 
 
